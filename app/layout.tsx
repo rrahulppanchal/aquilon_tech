@@ -1,30 +1,26 @@
-import { Geist, Geist_Mono, Inter } from "next/font/google"
-
+import type { Metadata, Viewport } from "next"
+import { Archivo } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
-
-const inter = Inter({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
+// One variable family: condensed widths for headings, normal width for reading.
+const archivo = Archivo({
   subsets: ["latin"],
-  variable: "--font-mono",
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
 })
-
+export const metadata: Metadata = {
+  title: "Fieldquote",
+  description:
+    "Draft quotes from customer enquiries using your own rates. Nothing goes out until you approve it.",
+  robots: { index: false, follow: false },
+}
+export const viewport: Viewport = { themeColor: "#1e282e" }
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", inter.variable)}
-    >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+    <html lang="en-GB" className={archivo.variable}>
+      <body>{children}</body>
     </html>
   )
 }

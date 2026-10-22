@@ -37,3 +37,11 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+docs*
+
+# App artifacts
+!.env.example
+/playwright-report/
+/test-results/
+/.pnpm-store/
+.claude*

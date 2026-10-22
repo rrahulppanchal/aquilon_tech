@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test"
+import { test, expect, type Locator, type Page } from "@playwright/test"
 import pg from "pg"
 import { readFileSync } from "node:fs"
 import { randomUUID } from "node:crypto"
@@ -80,6 +80,16 @@ async function signIn(page: Page, prefix: "HOLLIS" | "GREENFIELD" | "SHAZ") {
     .fill(process.env[`${prefix}_DEMO_PASSWORD`]!)
   await page.getByRole("button", { name: "Sign in", exact: true }).click()
   await expect(page).toHaveURL(/\/enquiries$/)
+}
+// Picks an option from one of the app's styled dropdowns (SelectMenu).
+async function choose(
+  page: Page,
+  scope: Page | Locator,
+  label: string,
+  option: string
+) {
+  await scope.getByRole("combobox", { name: label, exact: true }).click()
+  await page.getByRole("option", { name: option, exact: true }).click()
 }
 const okafor = () => quoteIds[0]
 const greenway = () => quoteIds[1]
@@ -295,12 +305,12 @@ test("owner adds, edits and deletes a rate; approvers can't", async ({
   await page.getByRole("button", { name: "Add rate", exact: true }).click()
   const form = page.getByRole("dialog", { name: "Add a rate" })
   await form.getByLabel("Code").fill("e2e01")
-  await form.getByLabel("Item").fill("Test drainage grating")
-  await form.getByLabel("Status").selectOption("active")
+  await form.getByLabel("Description").fill("Test drainage grating")
+  await choose(page, form, "Status", "In use")
   await form.getByRole("button", { name: "Add rate" }).click()
   await expect(form.getByText(/needs a price/)).toBeVisible()
-  await form.getByLabel("Price, ex VAT").fill("42.50")
-  await form.getByLabel("Per").selectOption("m")
+  await form.getByLabel(/Rate, ex VAT/).fill("42.50")
+  await choose(page, form, "Unit", "m")
   await form.getByRole("button", { name: "Add rate" }).click()
   await expect(form).toBeHidden()
   // The rate list is paged, so find the new rate by searching for it.
@@ -309,7 +319,7 @@ test("owner adds, edits and deletes a rate; approvers can't", async ({
   await expect(row).toContainText("£42.50")
   await row.getByRole("button", { name: "Edit E2E01" }).click()
   const edit = page.getByRole("dialog", { name: "Edit E2E01" })
-  await edit.getByLabel("Price, ex VAT").fill("45")
+  await edit.getByLabel(/Rate, ex VAT/).fill("45")
   await edit.getByRole("button", { name: "Save rate" }).click()
   await expect(row).toContainText("£45.00")
   await page.reload()
@@ -459,13 +469,15 @@ test("list pagination resets when filters change and works on mobile", async ({
   await pagination.getByRole("button", { name: "Next", exact: true }).click()
   await expect(pagination).toContainText("Page 2")
   await page.getByPlaceholder("Search code or item").fill("BP01")
-  await expect(page.locator("tbody .code", { hasText: /^BP01$/ })).toBeVisible()
+  await expect(
+    page.locator("tbody .rate-code", { hasText: /^BP01$/ })
+  ).toBeVisible()
   await expect(pagination).toContainText("Page 1 of 1")
   await expect(
     pagination.getByRole("button", { name: "Next", exact: true })
   ).toBeDisabled()
   await page.getByRole("button", { name: "Clear filters", exact: true }).click()
-  await pagination.getByLabel("Per page").selectOption("25")
+  await choose(page, pagination, "Rows per page", "25")
   await expect(page.locator("tbody tr")).toHaveCount(25)
   await page.setViewportSize({ width: 390, height: 844 })
   await expect(

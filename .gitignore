@@ -37,7 +37,11 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-docs*
+# Working notes stay private; only the public guides are published.
+docs/*
+!docs/SETUP.md
+!docs/TESTING.md
+!docs/hand-test-plan.pdf
 
 # App artifacts
 !.env.example
@@ -45,3 +49,6 @@ docs*
 /test-results/
 /.pnpm-store/
 .claude*
+
+# Contains live demo passwords; share privately, never commit
+docs/testing-flow.pdf
